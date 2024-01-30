@@ -34,6 +34,13 @@ from plot_p300_erps import epoch_data
 
 (erp_times,eeg_epochs) = epoch_data (eeg_time, eeg_data, event_sample,epoch_start_time = -0.5, epoch_end_time = 1.0)
 
+#%%
+# Part 4
+
+from plot_p300_erps import get_erps
+
+get_erps(eeg_epochs, is_target_event)
+
 #%% Test by visualizing the data. The following should be removed 
 
 import matplotlib.pyplot as plt 

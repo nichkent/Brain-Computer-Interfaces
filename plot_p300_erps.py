@@ -26,6 +26,7 @@ def get_events(rowcol_id, is_target):
            bool[] is_target_event : An array indicating for each index in event_sample whether the corresponding event was a target in the is_target array.
     """
     # Create an array of the samples when the event ID went up (flashes)
+    # Add 1 to the index to account for the forward difference
     event_sample = np.array(np.where(np.diff(rowcol_id) > 0)[0] + 1)
     
     # Use event_sample to index the is_target array
@@ -110,3 +111,24 @@ def epoch_data (eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch
                  eeg_epochs[sample_index,channel_index,epoch_index]= eeg_data[channel_index,start+sample_index]
                     
      return (erp_times,eeg_epochs)
+ 
+#%%
+# Part 4
+def get_erps(eeg_epochs, is_target_event):
+    """get_erps this function uses eeg_epochs along with is_target_event to find when a target event
+     occurs. 
+    Creates and returns two arrays, target_erp and nontarget_erp.
+       
+       params: 
+           int[] eeg_epochs : 
+           bool[] is_target_event : 
+       returns: 
+           int[] target_erp : 
+           bool[] nontarget_erp : 
+    """
+    # Use boolean indexing to extract ERPs for the target and nontarget trails
+    target_erp = # True boolean indexing
+    nontarget_erp = # False boolean indexing
+    
+    
+    return target_erp, nontarget_erp
