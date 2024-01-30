@@ -127,8 +127,8 @@ def get_erps(eeg_epochs, is_target_event):
            bool[] nontarget_erp : 
     """
     # Use boolean indexing to extract ERPs for the target and nontarget trails
-    target_erp = # True boolean indexing
-    nontarget_erp = # False boolean indexing
+    #target_erp = # True boolean indexing
+    #nontarget_erp = # False boolean indexing
     
     
     return target_erp, nontarget_erp
