@@ -115,20 +115,26 @@ def epoch_data (eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch
 #%%
 # Part 4
 def get_erps(eeg_epochs, is_target_event):
-    """get_erps this function uses eeg_epochs along with is_target_event to find when a target event
-     occurs. 
+    """get_erps calculates the Event-Related Potentials (ERPs) for target and nontarget events.
     Creates and returns two arrays, target_erp and nontarget_erp.
        
        params: 
-           int[] eeg_epochs : 
-           bool[] is_target_event : 
+           eeg_epochs : 3D array of EEG data [samples, channels, epochs].
+           is_target_event : Boolean array indicating target events.
+
        returns: 
-           int[] target_erp : 
-           bool[] nontarget_erp : 
-    """
-    # Use boolean indexing to extract ERPs for the target and nontarget trails
-    #target_erp = # True boolean indexing
-    #nontarget_erp = # False boolean indexing
-    
-    
+           target_erp : 2D array of ERPs for target events [samples, channels].
+           nontarget_erp : 2D array of ERPs for non-target events [samples, channels].
+    """    
+    # Boolean indexing to extract target and nontarget epochs
+    # Include all elements from samples, channels for each is_target_event
+    target_epochs = eeg_epochs[:, :, is_target_event] 
+    nontarget_epochs = eeg_epochs[:, :, ~is_target_event]
+
+    # Calculate mean across epochs for target and nontarget events
+    # Axis = 2 to compute the mean across each [sample, channel]
+    target_erp = np.mean(target_epochs, axis=2)
+    nontarget_erp = np.mean(nontarget_epochs, axis=2)
+
+    # Return target_erp and nontarget_erp
     return target_erp, nontarget_erp

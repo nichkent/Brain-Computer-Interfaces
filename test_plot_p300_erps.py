@@ -36,10 +36,11 @@ from plot_p300_erps import epoch_data
 
 #%%
 # Part 4
-
+# Import get_erps method
 from plot_p300_erps import get_erps
 
-get_erps(eeg_epochs, is_target_event)
+# get_erps call
+target_erp, nontarget_erp = get_erps(eeg_epochs, is_target_event)
 
 #%% Test by visualizing the data. The following should be removed 
 
