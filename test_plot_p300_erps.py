@@ -42,6 +42,18 @@ from plot_p300_erps import get_erps
 # get_erps call
 target_erp, nontarget_erp = get_erps(eeg_epochs, is_target_event)
 
+
+
+#%% Part 5 Function call
+
+#C:\Users\Jim03121957\OneDrive\Documents\GitHub\BCI
+
+
+from plot_p300_erps import plot_erps
+
+plot_erps(target_erp,nontarget_erp,erp_times)
+
+'''
 #%% Test by visualizing the data. The following should be removed 
 
 import matplotlib.pyplot as plt 
@@ -77,3 +89,21 @@ plt.tick_params('x', labelbottom=True)
  
 plt.show()
 plt.tight_layout()
+'''
+
+#%% Part 6 
+data_directory = "./P300Data"
+from plot_p300_erps import get_events
+from plot_p300_erps import epoch_data
+from plot_p300_erps import get_erps
+from plot_p300_erps import plot_erps
+import matplotlib.pyplot as plt
+
+for subject_index in range (4,5):
+    subject_3 = subject_index
+    eeg_time, eeg_data, rowcol_id, is_target = load_training_eeg(subject_3, data_directory)
+    event_sample, is_target_event = get_events(rowcol_id, is_target)
+    erp_times,eeg_epochs = epoch_data (eeg_time, eeg_data, event_sample,epoch_start_time = -0.5, epoch_end_time = 1.0)
+    target_erp, nontarget_erp = get_erps(eeg_epochs, is_target_event)
+    plot_erps(target_erp,nontarget_erp,erp_times)
+    #plt.title (f'Subject {subject_index} Mean Response',fontsize= 16 )

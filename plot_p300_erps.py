@@ -26,7 +26,6 @@ def get_events(rowcol_id, is_target):
            bool[] is_target_event : An array indicating for each index in event_sample whether the corresponding event was a target in the is_target array.
     """
     # Create an array of the samples when the event ID went up (flashes)
-    # Add 1 to the index to account for the forward difference
     event_sample = np.array(np.where(np.diff(rowcol_id) > 0)[0] + 1)
     
     # Use event_sample to index the is_target array
@@ -111,7 +110,7 @@ def epoch_data (eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch
                  eeg_epochs[sample_index,channel_index,epoch_index]= eeg_data[channel_index,start+sample_index]
                     
      return (erp_times,eeg_epochs)
- 
+
 #%%
 # Part 4
 def get_erps(eeg_epochs, is_target_event):
@@ -138,3 +137,135 @@ def get_erps(eeg_epochs, is_target_event):
 
     # Return target_erp and nontarget_erp
     return target_erp, nontarget_erp
+
+
+
+#%% Part 5
+def plot_erps(target_erp,nontarget_erp,erp_times):
+    '''
+    Inputs: 
+        
+        target_erp - Type[]: 2 D matrix:  [sample_index x sensor channels] eeg data when the flashed row or column contains the target letter.
+                                axis 0 mean sampled data   
+                                axis 1 eeg sensor channels 
+        nontarget_erp - Type[]: 2 D matrix:  [sample_index x sensor channels] associated with flashed rows or columns that do not contain the target letter
+                                   axis 0 mean sampled data   
+                                   axis 1 eeg sensor channels                      
+        erp_times - Type[]: a vector [sample index x 1] of times in seconds relative to the start of a column or row flash.                                  
+                                sample index is the same value as the sample index in target_erp[] and nontarget_erp[]
+     
+    Description: Plots the ERP data in 3 x 3 subplots.  The mean target and non target data is plotted separately on top of each other. 
+                 Refernce markers are include to indicte the zero voltge level and to identify the onset of the flashed rows or columns.
+                 Plot to figure 1  or ()???
+                 Store the figure to a file ???
+                 Hard code for 8 figures ???
+    Returns: None
+ 
+    '''
+    # When I restart kernal need to reidentify directory???
+
+    #C:\Users\Jim03121957\OneDrive\Documents\GitHub\BCI ???
+
+    # Create 3 x 3 subplots consisting of the 8 EEG channels.   
+    # Design the subplots so that it works regardless of the number of EEG channels. ???
+ 
+    # Do not assume that pypot has been imported
+    import matplotlib.pyplot as plt
+    # Determine the number of EEG sensor channels
+
+    # Establish a matrix 3x3 of subplots, all with the same x and y axis, figure 10" wide by 7" high
+    # Use constrained layout to prevent overlap  ???
+
+    # how to format the size of the legend???
+    #location of the legend ???
+    #size of figure x inches by y inches ???
+    #
+#%% set-up the aesthetics of the plot
+    #fig, axs = plt.subplots(3, 3, sharex= 'all', sharey= 'all', figsize = (11, 8), constrained_layout = False, num =1, clear=True)
+    fig, axs = plt.subplots(3, 3, sharex= 'all', sharey= 'all', figsize = (11, 8), constrained_layout = False,  clear=True)
+    # The subplot functions returns:
+            #axs: in this case an array axes objects containing subplot aesthetics
+    axs[0,0].set_ylabel('Mean EEG Data (uV)', fontsize= 8)
+    # Remove the last subplot (9) only 8 sensors
+    axs[2,2].set_axis_off()
+    #plt.ylim(-2.5, 2.5)
+    #plt.ylim(-100, 100)
+    plt.xlim(-.5,1)
+    plt.grid(axis='both',color='r', linestyle='-', linewidth=2)
+    axs[2,0].set_xlabel('Time (sec)',fontsize = 8)
+    axs[2,1].set_xlabel('Time (sec)',fontsize = 8)
+
+    axs[1,2].set_xlabel('Time (sec)',fontsize = 8)
+    axs[0,0].set_ylabel('Mean EEG Data (uV)', fontsize= 8)
+    axs[1,0].set_ylabel('Mean EEG Data (uV)', fontsize= 8)
+    axs[2,0].set_ylabel('Mean EEG Data (uV)', fontsize= 8)
+
+    plt.rc('xtick', labelsize=6) 
+    plt.rc('ytick', labelsize=6)
+    
+    # these are matplotlib.patch.Patch properties
+    props = dict(boxstyle='round', facecolor='lightgray', alpha=0.5)
+
+#%% Populate the plot with data
+    subject_index = 3           # Hard code starting with subject three
+    plot_index = 1              # subplots are identified starting at 1
+    for row_index in range(3):
+        for col_index in range(3):
+            if plot_index <= 8:  # 8 is for now the maximum number of sensors channels to plot
+               axs[row_index,col_index] = plt.subplot(3,3,plot_index)   # For now assume 3 x 3                   
+      #Plot the data                  
+               # using the time values in the erp_times vector, plot the mean eeg signals associated with sensor plot_index
+               # erp_times and target_erp provided by the get_erps function, which returns two arrays target and non target arrays
+               plt.plot(erp_times, nontarget_erp[:,plot_index-1],label = 'Non-Target')
+               #plt.plot(erp_times, target_erp[:,plot_index-1],'--','r',label = 'Target Mean')   # assume sensors range from 0 
+               # over plot "hold on" the non target mean sensor values 
+               plt.plot(erp_times, target_erp[:,plot_index-1],label = 'Target')
+               
+               #axs[row_index,col_index].legend('Target',fontsize = 4, loc= 'upper left' )
+               #axs[row_index,col_index].legend('Target')
+               #plt.plot([0,0],[-10,10],'c','--', label = "Event Ref.") # Event reference
+               #plt.plot([-.5,1],[-10,-10],'--', label = "Non-Target Mean" )     # test data 
+               plt.tick_params('x', labelbottom=True , labelsize = 8)
+               plt.tick_params('y', labelleft=True, labelsize=8)
+               
+               #Plot the refernce markers
+               plt.grid(axis='both',color='b', linestyle='--', linewidth = 0.1)         
+               plt.plot([-.5,1],[0,0],'c',label = 'Zero Ref') # zero reference 
+               
+               # When I include this it mewsses up the y axis tics
+               plt.plot([0,0],[-2,1.5],'r', label = 'Flash Ref')  # reference associated with the start of row/col flash
+       
+              #plt.title(f'EGG Sensor {plot_index}',fontsize=10)
+              # place a text box in upper center of subplot
+               axs[row_index,col_index]=plt.text(0.4, 0.95, (f'EGG Sensor {plot_index}'), transform=axs[row_index,col_index].transAxes, fontsize=10,
+                     verticalalignment='top', bbox=props)      
+           
+               # Sequence through the sensor channels  
+               plot_index += 1 
+            else:  # Sensor channel 9 does not exist so don't plot data, instead display the plot legend.
+                plt.legend(bbox_to_anchor = (1.4,.9), ncol=1)
+                plt.savefig (f'P300_Subject_{subject_index}')
+                plt.title (f'Subject {subject_index} Mean Response',fontsize= 10 )
+  
+#%% Save the figure to a PNG file
+
+  #  fig.savefig ('draft_figure_part_5')   # save the last figure, why does it go into the next level up folder???
+        
+  #  plt.show()              # not sure if I need this ??? once per session
+    
+    #plt.tight_layout()  # not sure if I need this 
+
+# END
+
+
+
+
+
+
+
+
+
+
+
+
+        
