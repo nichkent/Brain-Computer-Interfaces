@@ -36,7 +36,7 @@ train_data = data["s" + str(subject)]['train']
 # Store the data in numpy arrays
 eeg_time = np.array(train_data[0]) # Stores subject time
 
-eeg_data = np.array(train_data[1:8]) # Stores subject data
+eeg_data = np.array(train_data[1:9]) # Stores subject data
 
 rowcol_id = np.array(train_data[9], dtype = int) # Stores the id of the row and col of the flashed number
 

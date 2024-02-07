@@ -3,15 +3,18 @@
 Created on Thu Jan 25 10:04:47 2024
 
 File: plot_p300_erps.py
-Authors: Nicholas Kent
+Authors: Nicholas Kent, James Averill
 Date: 1/25/2024
-Description:
+Description: This script, plot_p300_erps.py, takes the p300 data found from load_p300_data.py and calculates ERPs. The ERPs are found
+by determining when a target event happened and then recording the eeg_data at that event. It then averages the ERPs and plots them for easy viewing.
 """
+
+#%% Part 1
 # Imports
 import numpy as np
 from matplotlib import pyplot as plt
 
-#%%
+#%% 
 # Part 2
 def get_events(rowcol_id, is_target):  
     """get_events this function uses rowcol_id to identify moments when
@@ -22,12 +25,15 @@ def get_events(rowcol_id, is_target):
            int[] rowcol_id : row/col id of the letter being flashed on screen
            bool[] is_target : true if the letter was a letter the participant was supposed to type, false otherwise
        returns: 
-           int[] event_sample : An array of indicies where event IDs in rowcol_id move upward. Indicates a start of a new event.
-           bool[] is_target_event : An array indicating for each index in event_sample whether the corresponding event was a target in the is_target array.
+           int[] event_sample : An array of indicies where event IDs in rowcol_id move upward. Indicates a start of a new row/col flash event.
+           bool[] is_target_event : An array indicating for each index into event_sample that this event corresponds to the flashing of a target letter.
     """
     # Create an array of the samples when the event ID went up (flashes)
-    event_sample = np.array(np.where(np.diff(rowcol_id) > 0)[0] + 1)
     
+    # This is a foward difference looking for positive value of (n+1) - n.  Need to add 1 to n to get the true location of the event  
+    
+    event_sample = np.array(np.where(np.diff(rowcol_id) > 0)[0] + 1)
+          
     # Use event_sample to index the is_target array
     is_target_event = is_target[event_sample]
             
@@ -39,42 +45,32 @@ def get_events(rowcol_id, is_target):
 def epoch_data (eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch_end_time = 1.0):
      '''
       Inputs:
+          eeg_time : TYPE: vector of floats.  
+              DESCRIPTION. Time associated with sampling off eeg data
+          eeg_data : TYPE: Matrix with 2 dimensions
+              DESCRIPTION. Axis(0) Associated with sensor, axis(1) raw data
+          event_sample : TYPE vector of int
+              DESCRIPTION. Index into eeg_data associated when a row or column was flashed
+          epoch_start_time : TYPE, optional
+              DESCRIPTION. The default is -0.5 (sec).
+          epoch_end_time : TYPE, optional
+              DESCRIPTION. The default is 1.0 (sec).
       
-      Purpose:
+      Purpose: Epoch Data which are windowed snap shots of the data around events.
           
       Outputs: 
-      1) np.array containing the Epoch Data which are windowed snap shots of the data around events. 
-      The Epoch data is a A three dimensional matrix; axis (0) consists of the raw eeg sensor data, axis (1) consists of the eight eeg sensor channels 
-      and axis (2) epoch or realization - each of the identified events (i.e. when a row or column flashes)
-      2) Relative time associated with each event 
+          eeg_epochs: Type:np.array containing the  
+              The Epoch data is a A three dimensional matrix:
+                  axis (0) consists of the raw eeg sensor data, for a default time window of 1.5 sec and fs - 256 => 1.5*256+1=385 
+                  axis (1) consists of the eight eeg sensor channels, and  
+                  axis (2) epoch or realization - each of the identified events (i.e. when a row or column flashes)
       
-         
-      # how did this get here???
-    
-      Parameters
-      ----------
-      eeg_time : TYPE: vector of floats.  
-          DESCRIPTION. Time associated with sampling off eeg data
-      eeg_data : TYPE: Matrix with 2 dimensions
-          DESCRIPTION. Axis(0) Associated with sensor, axis(1) raw data
-      event_sample : TYPE vector of int
-          DESCRIPTION. Index into eeg_data associated when a row or column was flashed
-      epoch_start_time : TYPE, optional
-          DESCRIPTION. The default is -0.5 (sec).
-      epoch_end_time : TYPE, optional
-          DESCRIPTION. The default is 1.0 (sec).
-    
-      Returns
-      -------
-      eeg_epochs: Type:
-                  Description: Matrix with three dimensions.  First axis(0) raw eeg windowed sample data, 
-                      second axis(1) each of the epochs, third axis(2) eeg sensors total
+           
       erp_times:  Type: vector of floats 
-                  Description: Values represent the relative time to the target event associated with each of the 
-                  eeg_epochs data samples.
+          Relative time associated with each event, for the default time this will range from -0.5 to 1.5
        
       Assumptions
-      Fixed sample time for all the data
+          Fixed sample time for all the data
       '''    
      # Calaculate the sample period based upon time between two arbritrary samples
      ts = eeg_time[10]-eeg_time[9]
@@ -104,8 +100,8 @@ def epoch_data (eeg_time, eeg_data, event_sample, epoch_start_time = -0.5, epoch
                  # sample index for eeg_epochs runs from 0 to the total number of samples
                  # The data contained in egg_data is adjusted based upon the index into event samples
                  # eeg_epoch[0] corrsponds to event_sample[epoch_index] + (epoch_start_time*fs) (note epoch_start_time a negative value)
-                # epoch_index = 0
-                # epoch_start_time = -0.5
+                 # epoch_index = 0
+                 # epoch_start_time = -0.5
                  start = int(event_sample[epoch_index] + (epoch_start_time*fs))
                  eeg_epochs[sample_index,channel_index,epoch_index]= eeg_data[channel_index,start+sample_index]
                     
@@ -134,14 +130,17 @@ def get_erps(eeg_epochs, is_target_event):
     # Axis = 2 to compute the mean across each [sample, channel]
     target_erp = np.mean(target_epochs, axis=2)
     nontarget_erp = np.mean(nontarget_epochs, axis=2)
-
+    
+    # commented code below was created to investigate the variance differnces between target and nontarget data  variance = 1/sqrt(N)
+    #nontarget_erp = np.mean(nontarget_epochs[:,:,1:150], axis=2) # make sample size the same as target erp= 150
+    
     # Return target_erp and nontarget_erp
     return target_erp, nontarget_erp
 
 
 
 #%% Part 5
-def plot_erps(target_erp,nontarget_erp,erp_times):
+def plot_erps(target_erp,nontarget_erp,erp_times,subject):
     '''
     Inputs: 
         
@@ -153,33 +152,20 @@ def plot_erps(target_erp,nontarget_erp,erp_times):
                                    axis 1 eeg sensor channels                      
         erp_times - Type[]: a vector [sample index x 1] of times in seconds relative to the start of a column or row flash.                                  
                                 sample index is the same value as the sample index in target_erp[] and nontarget_erp[]
-     
-    Description: Plots the ERP data in 3 x 3 subplots.  The mean target and non target data is plotted separately on top of each other. 
+        subject: Int ID of subject to plot
+    
+    Description: Plots the ERP data in 3 x 3 subplots for the range of subject(s) passed as an input parameter.  The mean target and non target data is plotted separately on top of each other. 
                  Refernce markers are include to indicte the zero voltge level and to identify the onset of the flashed rows or columns.
-                 Plot to figure 1  or ()???
-                 Store the figure to a file ???
-                 Hard code for 8 figures ???
+    
     Returns: None
  
-    '''
-    # When I restart kernal need to reidentify directory???
-
-    #C:\Users\Jim03121957\OneDrive\Documents\GitHub\BCI ???
-
-    # Create 3 x 3 subplots consisting of the 8 EEG channels.   
-    # Design the subplots so that it works regardless of the number of EEG channels. ???
+    Assumptions:  Number of subplots = 8
  
-    # Do not assume that pypot has been imported
+    '''
+  
+    # Do not assume that pyplot has been imported
     import matplotlib.pyplot as plt
-    # Determine the number of EEG sensor channels
-
-    # Establish a matrix 3x3 of subplots, all with the same x and y axis, figure 10" wide by 7" high
-    # Use constrained layout to prevent overlap  ???
-
-    # how to format the size of the legend???
-    #location of the legend ???
-    #size of figure x inches by y inches ???
-    #
+  
 #%% set-up the aesthetics of the plot
     #fig, axs = plt.subplots(3, 3, sharex= 'all', sharey= 'all', figsize = (11, 8), constrained_layout = False, num =1, clear=True)
     fig, axs = plt.subplots(3, 3, sharex= 'all', sharey= 'all', figsize = (11, 8), constrained_layout = False,  clear=True)
@@ -189,7 +175,7 @@ def plot_erps(target_erp,nontarget_erp,erp_times):
     # Remove the last subplot (9) only 8 sensors
     axs[2,2].set_axis_off()
     #plt.ylim(-2.5, 2.5)
-    #plt.ylim(-100, 100)
+    plt.ylim(-5, 5)         # want all subjects and subplots to have the same y-axis +/- 5 is a good compromise
     plt.xlim(-.5,1)
     plt.grid(axis='both',color='r', linestyle='-', linewidth=2)
     axs[2,0].set_xlabel('Time (sec)',fontsize = 8)
@@ -207,7 +193,7 @@ def plot_erps(target_erp,nontarget_erp,erp_times):
     props = dict(boxstyle='round', facecolor='lightgray', alpha=0.5)
 
 #%% Populate the plot with data
-    subject_index = 3           # Hard code starting with subject three
+    #subject_index = 3           # Hard code starting with subject three
     plot_index = 1              # subplots are identified starting at 1
     for row_index in range(3):
         for col_index in range(3):
@@ -242,20 +228,14 @@ def plot_erps(target_erp,nontarget_erp,erp_times):
            
                # Sequence through the sensor channels  
                plot_index += 1 
-            else:  # Sensor channel 9 does not exist so don't plot data, instead display the plot legend.
+            else:  # Sensor channel 9 does not exist so don't plot data
+                # Instead use this to update with the figure with legend and "subject" information.
                 plt.legend(bbox_to_anchor = (1.4,.9), ncol=1)
-                plt.savefig (f'P300_Subject_{subject_index}')
-                plt.title (f'Subject {subject_index} Mean Response',fontsize= 10 )
-  
-#%% Save the figure to a PNG file
-
-  #  fig.savefig ('draft_figure_part_5')   # save the last figure, why does it go into the next level up folder???
-        
-  #  plt.show()              # not sure if I need this ??? once per session
-    
-    #plt.tight_layout()  # not sure if I need this 
-
-# END
+                # Place the subject info above the legend.  y = 1.0 is the top of plot, pad -14 drops it down corresponding to  font = 14
+                axs[2,2].set_title(f'P300 Subject {subject} Mean', y=1.0, pad=-14)
+                
+                # Now save the figure
+                plt.savefig (f'P300_Subject_{subject}')
 
 
 
