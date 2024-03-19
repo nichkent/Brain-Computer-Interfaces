@@ -35,7 +35,7 @@ filter_order = 1000
 fs = data['fs']
 
 # For 12 Hz, returns the filter coefficients for 12hz
-filter_coefficients_b_12hz = make_bandpass_filter(low_cutoff, high_cutoff, filter_order, fs, filter_type)
+filter_coefficients_b_12hz = make_bandpass_filter(low_cutoff, high_cutoff, filter_type, filter_order, fs)
 
 # 15 Hz var definitions
 low_cutoff = 14
@@ -45,7 +45,7 @@ filter_order = 1000
 fs = data['fs']
 
 # For 15 Hz, returns the filter coefficients for 15hz
-filter_coefficients_b_15hz = make_bandpass_filter(low_cutoff, high_cutoff, filter_order, fs, filter_type)
+filter_coefficients_b_15hz = make_bandpass_filter(low_cutoff, high_cutoff, filter_type, filter_order, fs)
 
 
 print(filter_coefficients_b_12hz)
@@ -70,3 +70,9 @@ more computationally expensive and introduce more delay. Decreasing the filter o
 band becomes wider, requiring less computation and introducing less delay, but at the cost of less sharp separation 
 between the filtered and unfiltered frequencies.
 '''
+
+#%% Part 3: Filter the EEG Signals
+from filter_ssvep_data import filter_data
+
+filtered_12hz = filter_data(data, filter_coefficients_b_12hz)
+filtered_15hz = filter_data(data, filter_coefficients_b_15hz)

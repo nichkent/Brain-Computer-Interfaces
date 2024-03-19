@@ -13,10 +13,10 @@ Description: This script, filter_ssvep_data.py,
 
 # Import libraries
 import numpy as np
-from scipy.signal import firwin, freqz
+from scipy.signal import firwin, freqz, filtfilt
 import matplotlib.pyplot as plt
 
-def make_bandpass_filter(low_cutoff, high_cutoff, filter_order=10, fs="1000", filter_type="hann"):
+def make_bandpass_filter(low_cutoff, high_cutoff, filter_type="hann", filter_order=10, fs="1000"):
     """
     Creates a bandpass filter and plots its impulse and frequency responses.
     
@@ -96,3 +96,52 @@ def make_bandpass_filter(low_cutoff, high_cutoff, filter_order=10, fs="1000", fi
     
     # Return the filter coefficients
     return filter_coefficients
+
+#%% Part 3: Filter EEG Signals
+
+def filter_data(data, b):
+    """
+    Applies the bandpass filter to EEG data for each channel for one subject. 
+    The filter is applied forwards and backwards in time to each channel of 
+    the raw EEG data using scipy's filtfilt function. 
+
+    Parameters
+    ----------
+    data : Dict of size 6.
+        A dictionary where keys are channels, eeg, event_durations, 
+        event_samples, event_types, and fs. Values are arrays, details of each
+        array follow. 
+        - Channels: Array of str, size (C,) where C is the number of channels.
+        Values represent channel names, for example "Cz".
+        - eeg: Array of float, size (C,S) where C is the number of channels and
+        S is the number of samples. Values represent raw EEG data in volts.
+        - event_durations: Array of float, size (E,) where E is the number of 
+        events. Values represent the duration of each event in samples.
+        - event_samples: Array of int, size (E,) where E is the number of events.
+        Values represent the sample when each event occurred.
+        - event_types: Array of object, size (E,) where E is the number of events.
+        Values represent the frequency of flickering checkboard that started 
+        flashing for an event (12hz or 15hz)
+        - fs: Array of float, size 1. The sampling frequency in Hz.
+    b : Array of float, size (O+1,) where O is the order of the filter. In our
+    case, the filter order is 1000 so b is size (1001,)
+        The filter coefficients. 
+
+    Returns
+    -------
+    filtered_data : Array of float, size (C,S) where C is the number of channels 
+    present in the raw EEG data and S is the numebr of samples present in the 
+    raw EEG data.
+        Filtered EEG data in uV.
+
+    """
+    # apply filter forwards and backwards in time to each channel in raw data
+    # initialize variable to hold filtered data
+    filtered_data=np.zeros((data["eeg"].shape))
+
+    # under eeg key, each row is a channel and each column is a sample
+    for channel in range(data["eeg"].shape[0]):
+        # get filtered data for a channel in v
+        filtered_data[channel] = filtfilt(b, 1, data["eeg"][channel])
+        filtered_data[channel] = filtered_data[channel] * 1000000 # convert to uv
+    return filtered_data
