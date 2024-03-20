@@ -3,7 +3,7 @@
 Created on Thu Mar  7 11:28:34 2024
 
 File: test_filter_ssvep_data.py
-Authors: Nicholas Kent, 
+Authors: Nicholas Kent, Alaina Birney
 Date: 3/7/2024
 Description: This script, test_filter_ssvep_data.py,
 """
@@ -74,5 +74,17 @@ between the filtered and unfiltered frequencies.
 #%% Part 3: Filter the EEG Signals
 from filter_ssvep_data import filter_data
 
+# filter data with band-pass filter to capture 12hz oscillations
 filtered_12hz = filter_data(data, filter_coefficients_b_12hz)
+
+# filter data with band-pass filter to capture 15hz oscillations
 filtered_15hz = filter_data(data, filter_coefficients_b_15hz)
+
+#%% Part 4: Calculate the envelope
+from filter_ssvep_data import get_envelope
+
+# get 15hz envelope for filtered data for electrode Oz
+envelope_15hz = get_envelope(data, filtered_15hz, "Oz", ssvep_frequency="15 Hz")
+
+# get 12hz envelope for filtered data for electrode Oz
+envelope_12hz = get_envelope(data, filtered_12hz, "Oz", ssvep_frequency="12 Hz")
