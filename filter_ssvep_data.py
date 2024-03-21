@@ -55,15 +55,19 @@ def make_bandpass_filter(low_cutoff, high_cutoff, filter_type="hann", filter_ord
     filter_coefficients = firwin(filter_order + 1, [low_cutoff, high_cutoff], pass_zero=False, window=filter_type, fs=fs)
     
     # Calculate the frequency response of the filter
-    freq_response, response = freqz(filter_coefficients, worN=2048, fs=fs)  # Increase worN for better frequency resolution, 2048 because it's a number divisible by 2
+    freq_points, freq_response = freqz(filter_coefficients)
     
-    # Plot the impulse response and frequency response
+    # Calculate frequency for the domain of the frequency graph
+    freq = freq_points * fs / (2 * np.pi)
+    
+    # Plot the impulse response and frequency response as subplots
     fig, axs = plt.subplots(2, 1, figsize=(12, 8))
     
     # Set up for the impulse response graph
-    # Make a time numpy array from 0 to the filter_order + 1.
-    time = np.arange(0, filter_order + 1) / fs   
+    # Make a time numpy array from 0 to the filter_coefficeints divided by the sampling frequency
+    time = np.arange(0, len(filter_coefficients)) / fs
     
+    # Use the time as the domain for the impulse graph
     axs[0].plot(time, filter_coefficients, 'dodgerblue')
     axs[0].set_title('impulse response')
     axs[0].set_xlabel('time (s)')
@@ -73,16 +77,17 @@ def make_bandpass_filter(low_cutoff, high_cutoff, filter_type="hann", filter_ord
     axs[0].grid()
     
     # Set up for the frequency response graph
-    axs[1].plot(freq_response, 20 * np.log10(abs(response)), 'dodgerblue')
+    # 10 * np.log10(abs(freq_response)) required for conversion to decibels for the frequency graph
+    axs[1].plot(freq, 10 * np.log10(abs(freq_response)), 'dodgerblue')
     axs[1].set_title('frequency response')
     axs[1].set_xlabel('frequency (Hz)')
     axs[1].set_ylabel('amplitude (dB)')
     axs[1].set_xlim(0, 40)
-    axs[1].set_ylim(-250, 5)
+    axs[1].set_ylim(-150, 5)
     axs[1].grid()
     
     # Name the graph
-    fig.suptitle(f"Bandpass {filter_type} filter with fc=[{low_cutoff}, {high_cutoff}], order={filter_order + 1}")
+    fig.suptitle(f"Bandpass {filter_type} filter with fc=[{low_cutoff}, {high_cutoff}], order={filter_order}")
     
     # Show the graph in a tight layout
     plt.tight_layout()
