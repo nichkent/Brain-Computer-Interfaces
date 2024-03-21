@@ -247,3 +247,106 @@ def get_envelope(data, filtered_data, channel_to_plot, ssvep_frequency="None"):
         filename = f"BPF_Data_Channel_{channel_to_plot}_Isolating_{ssvep_frequency}.png"
         plt.savefig(filename)
     return envelope
+
+#%% Part 5: Plot the Amplitudes
+
+
+
+def plot_ssvep_amplitudes(data, envelope_a, envelope_b, channel_to_plot,
+                          ssvep_freq_a, ssvep_freq_b, subject):
+    """
+    Creates two subplots. The top subplot shows the event types (12 Hz or 15 Hz
+    flashing) while the bottom subplot shows the 12 Hz and 15 Hz envelopes.
+    This visualization can help one to gain a better sense of whether or not
+    a subject is responding to an event.
+    Please note that this function includes code that was written with Ron 
+    Bryant for lab 3. The code has been modified for this lab. 
+
+    Parameters
+    ----------
+    data : Dict of size 6.
+        A dictionary where keys are channels, eeg, event_durations, 
+        event_samples, event_types, and fs. Values are arrays, details of each
+        array follow. 
+        - Channels: Array of str, size (C,) where C is the number of channels.
+        Values represent channel names, for example "Cz".
+        - eeg: Array of float, size (C,S) where C is the number of channels and
+        S is the number of samples. Values represent raw EEG data in volts.
+        - event_durations: Array of float, size (E,) where E is the number of 
+        events. Values represent the duration of each event in samples.
+        - event_samples: Array of int, size (E,) where E is the number of events.
+        Values represent the sample when each event occurred.
+        - event_types: Array of object, size (E,) where E is the number of events.
+        Values represent the frequency of flickering checkboard that started 
+        flashing for an event (12hz or 15hz)
+        - fs: Array of float, size 1. The sampling frequency in Hz.
+    envelope_a : Array of float, size (C,S) where C is the number of channels
+    and S is the number of samples.
+        The envelope of oscillations at the first SSVEP frequency.
+    envelope_b : Array of float, size (C,S) where C is the number of channels
+    and S is the number of samples.
+        The envelope of oscillations at the second SSVEP frequency.
+    channel_to_plot : Str
+        The channel for which data will be plotted.
+    ssvep_freq_a : Str
+        The SSVEP frequency being isolated in the first envelope. This is used 
+        for the legend only.
+    ssvep_freq_b : Str
+        The SSVEP frequency being isolated in the second envelope. This is used 
+        for the legend only.
+    subject : Int
+        The subject number for whom data will be plotted. This should correspond
+        with the subject number indicated when data was initially loaded.
+
+    Returns
+    -------
+    None.
+
+    """
+    #unpack data_dict
+    eeg_data = data['eeg']/1e-6   # convert to microvolts
+    channels = data['channels']   # channel names
+    fs = data['fs']                # sampling frequency
+    event_times = data['event_samples']/fs          # convert to seconds
+    event_types = data['event_types']        # frequency of event
+    event_durations = data['event_durations']/fs    # convert to seconds
+    T = eeg_data.shape[1]/fs # Total time
+    t = np.arange(0,T,1/fs) # time axis
+    
+    # initialize figure
+    plt.figure(1, clear=True)    
+    
+    # top subplot: events as horizontal lines with dots at start and end time 
+    # of each event (event start and end times)
+    ax1 = plt.subplot(211)
+    for event_index in range(0,len(event_times)):
+        event_time = [event_times[event_index],  
+                      event_times[event_index]+event_durations[event_index]]
+        event_frequency = [event_types[event_index],event_types[event_index]]
+        plt.plot(event_time, event_frequency, 'b.-')
+    plt.grid(True)
+    plt.ylabel('Flash Frequency')
+    plt.xlabel('time (s)')
+    
+    # second subplot: envelopes of the two filtered signals for subject and 
+    # channel to plot
+    plt.subplot(212, sharex=ax1) # share x axis
+    # get channel number from name to index envelopes
+    # initialize channel_idx_to_plot in case no match is found
+    channel_idx_to_plot = None
+    for channel_index, channel_value in enumerate(data["channels"]):
+        if channel_value == channel_to_plot:
+            channel_idx_to_plot = channel_index
+    if channel_idx_to_plot is not None:
+        plt.plot(t,envelope_a[channel_idx_to_plot,:], label=f"{ssvep_freq_a} Envelope")
+        plt.plot(t,envelope_b[channel_idx_to_plot,:], label=f"{ssvep_freq_b} Envelope")
+        plt.grid(True)
+        plt.ylabel('Voltage (uV)')
+        plt.xlabel('time (s)')
+        plt.legend(loc='upper right')
+       
+        plt.suptitle(f'Subject {subject} SSVEP Amplitudes')
+        plt.tight_layout()
+        # save to file
+        plt.savefig(f"S{subject}_amplitudes.png")
+        plt.show()

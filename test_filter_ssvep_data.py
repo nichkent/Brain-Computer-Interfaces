@@ -88,3 +88,21 @@ envelope_15hz = get_envelope(data, filtered_15hz, "Oz", ssvep_frequency="15 Hz")
 
 # get 12hz envelope for filtered data for electrode Oz
 envelope_12hz = get_envelope(data, filtered_12hz, "Oz", ssvep_frequency="12 Hz")
+
+#%% Part 5: Plot the Amplitudes
+from filter_ssvep_data import plot_ssvep_amplitudes
+
+dif = plot_ssvep_amplitudes(data, envelope_12hz, envelope_15hz, "Oz","12hz", "15hz", 1)
+
+"""
+What do the two envelopes do when the stimulation frequency changes?
+For subject 1, on average, the 12 Hz envelope displays higher amplitude than
+the 15 Hz envelope during the 12 Hz event. When the frequency changes to 15 Hz,
+there is no longer a clear difference seen in the amplitudes of the 12 Hz 
+and 15 Hz envelopes.
+
+How large and consistent are those changes?
+
+
+Are the brain signals responding to the events in the way you'd expect?
+"""
