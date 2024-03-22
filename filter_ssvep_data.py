@@ -261,6 +261,8 @@ def plot_ssvep_amplitudes(data, envelope_a, envelope_b, channel_to_plot,
     a subject is responding to an event.
     Please note that this function includes code that was written with Ron 
     Bryant for lab 3. The code has been modified for this lab. 
+    Additionally, please note that avg_dif_a and avg_dif_b were added as return
+    values to aid in answering the questions for part 5 in the test script.
 
     Parameters
     ----------
@@ -300,8 +302,24 @@ def plot_ssvep_amplitudes(data, envelope_a, envelope_b, channel_to_plot,
 
     Returns
     -------
-    None.
-
+    avg_dif_a : float
+        The average difference (uV) between the two envelopes (envelope_a and
+        envelope_b) during ssvep_freq_a events. This metric aims to quantify 
+        the relative strength of the EEG response to ssvep_freq_a events
+        compared to the response to ssvep_freq_b events by averaging the differences
+        in envelope amplitudes across the ssvep_freq_a events. A positive value
+        suggests that on average, envelope_a had higher amplitude during the 
+        ssvep_freq_a events while a negative value suggests that envelope_b 
+        had a higher amplitude during the ssvep_freq_a events.
+    avg_dif_b : float
+        The average difference (uV) between the two envelopes (envelope_a and
+        envelope_b) during ssvep_freq_b events. This metric aims to quantify 
+        the relative strength of the EEG response to ssvep_freq_a events
+        compared to the response to ssvep_freq_b events by averaging the differences
+        in envelope amplitudes across the ssvep_freq_b events. A positive value
+        suggests that on average, envelope_a had higher amplitude during the 
+        ssvep_freq_b events while a negative value suggests that envelope_b 
+        had a higher amplitude during the ssvep_freq_b events.
     """
     #unpack data_dict
     eeg_data = data['eeg']/1e-6   # convert to microvolts
@@ -334,7 +352,7 @@ def plot_ssvep_amplitudes(data, envelope_a, envelope_b, channel_to_plot,
     # get channel number from name to index envelopes
     # initialize channel_idx_to_plot in case no match is found
     channel_idx_to_plot = None
-    for channel_index, channel_value in enumerate(data["channels"]):
+    for channel_index, channel_value in enumerate(channels):
         if channel_value == channel_to_plot:
             channel_idx_to_plot = channel_index
     if channel_idx_to_plot is not None:
@@ -350,3 +368,17 @@ def plot_ssvep_amplitudes(data, envelope_a, envelope_b, channel_to_plot,
         # save to file
         plt.savefig(f"S{subject}_amplitudes.png")
         plt.show()
+        
+    # the following code was added to aid in answering the questions for part 5
+    # find overall difference between envelopes (a-b)
+    dif = envelope_a[channel_idx_to_plot, :] - envelope_b[channel_idx_to_plot,:]
+    # the event changes at approximately 228 seconds, so sample 228*fs
+    change_sample = int(228*fs)
+    # get mean difference during SSVEP frequency a events
+    avg_dif_a = np.mean(dif[:change_sample])
+    # get mean difference during SSVEP frequency b events
+    avg_dif_b = np.mean(dif[change_sample+1:])  
+    
+    return avg_dif_a, avg_dif_b
+    
+    

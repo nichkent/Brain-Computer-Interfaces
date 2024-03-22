@@ -84,25 +84,78 @@ filtered_15hz = filter_data(data, filter_coefficients_b_15hz)
 from filter_ssvep_data import get_envelope
 
 # get 15hz envelope for filtered data for electrode Oz
-envelope_15hz = get_envelope(data, filtered_15hz, "Oz", ssvep_frequency="15 Hz")
+envelope_15hz = get_envelope(data, filtered_15hz, "Fz", ssvep_frequency="15 Hz")
 
 # get 12hz envelope for filtered data for electrode Oz
-envelope_12hz = get_envelope(data, filtered_12hz, "Oz", ssvep_frequency="12 Hz")
+envelope_12hz = get_envelope(data, filtered_12hz, "Fz", ssvep_frequency="12 Hz")
 
 #%% Part 5: Plot the Amplitudes
 from filter_ssvep_data import plot_ssvep_amplitudes
 
-dif = plot_ssvep_amplitudes(data, envelope_12hz, envelope_15hz, "Oz","12hz", "15hz", 1)
+avg_dif_12hz, avg_dif_15hz = plot_ssvep_amplitudes(data, envelope_12hz, envelope_15hz, "Fz","12hz", "15hz", 1)
+
+# the following print statement was written to aid in answering the questions below
+print(f"Average difference (12hz envelope - 15 hz envelope)for 12 hz trials: {avg_dif_12hz}")
+print(f"Average difference (12hz envelope - 15 hz envelope)for 15 hz trials: {avg_dif_15hz}")
 
 """
 What do the two envelopes do when the stimulation frequency changes?
 For subject 1, on average, the 12 Hz envelope displays higher amplitude than
 the 15 Hz envelope during the 12 Hz event. When the frequency changes to 15 Hz,
-there is no longer a clear difference seen in the amplitudes of the 12 Hz 
-and 15 Hz envelopes.
+the difference in amplitudes of the 12 Hz and 15 Hz envelopes appears to be
+less drastic. However, the 12 Hz envelope still looks to display higher amplitude
+than the 15 Hz envelope, on average, during the 15 Hz trials.
 
 How large and consistent are those changes?
+The changes are not very large; on average, the 12 Hz envelope is approximately 
+0.97697 uV greater in amplitude than the 15 Hz envelope during the 12Hz events
+while the 12 Hz envelope is, on average, approximately 0.25413 uV greater in 
+amplitude than the 15 Hz envelope during the 15 Hz events. The changes are relatively
+consistent in that the 12 Hz envelope is consistently greater in amplitude than 
+the 15 Hz envelope during 12 Hz events. However, there is some fluctuation 
+during the 15 Hz events; although the 12 Hz envelope displays higher amplitude
+on average, occasionally the amplitude of the 15 Hz envelope surpasses the 12
+Hz envelope.
 
+Are the brain signals responding to the events in the way you'd expect? 
+Although the response does not seem very strong, this is a relatively expected
+result if the subject was focused on the 12 Hz target. We should expect 
+to see higher amplitude for the envelope representing the frequency
+corresponding to the target that the subject was focused on during the corresponding
+event, meaning we should see a higher amplitude in the 12 Hz envelope during the 
+12 Hz events.
 
-Are the brain signals responding to the events in the way you'd expect?
+Check some other electrodes- which electrodes respond in the same way and why?
+Because SSVEP activity is reflected in the primary visual cortex, it would make
+sense for similar responses to occur in elecrodes O1, O2, and Oz. If the 
+stimulus is on the left side, activity will be most strongly reflected in O2 while
+if the stimulus is on the right side, activity will be most strongly reflected in
+O1. 
+When the activity is checked for electrode O1, the result is similar to 
+results for electrode Oz, but differences are present; for both the 12 Hz and 
+15 Hz events, the 12 Hz envelope is higher in amplitude. However, in electrode 
+O1, on average, the difference between the 12 Hz and 15 Hz envelopes is less 
+drastic than in electrode Oz during 12 Hz events (the average difference of the 
+12 Hz envelope minus the 15 Hz envelope is approximately 0.89052 uV during 12 
+Hz events for electrode O1) and the difference between the 12 Hz and 15 Hz 
+envelopes is more drastic than in electrode Oz during 15 Hz events (the average 
+difference of the 12 Hz envelope minus the 15 Hz envelope is approximately 
+0.40429 uV during 15 Hz events for electrode O1). 
+When the activity is checked for electrode O2, the result is similar to results
+for electrode Oz, but more drastic. For both the 12 Hz and 15 Hz events, the 12 
+Hz envelope is higher in amplitude. Compared to results for electrode Oz, the 
+12 Hz envelope is higher in amplitude during the 12 Hz events (the average 
+difference was found to be approximately 0.99781 in this case) and the difference
+between the 12 Hz envelope and 15 Hz envelope is less extreme during the 15 Hz 
+events (the average difference was found to be approximately 0.22784 in this case). 
+These results suggest that the stimulus was on the left side of the subject's 
+visual field.
+Electrode Fz was also checked. Here, it was again found that the 12 Hz envelope
+was higher in amplitude during 12 Hz and 15 Hz events. However, the average difference
+was found to be approximately 0.081553 during 12 Hz events while the average
+difference was found to be approximately 0.07784 during 15 Hz events. The weak
+responses during both events and relatively similar values for 12 Hz and 15 Hz
+events align well with our understanding of SSVEPs; as electrode Fz does not
+measure activity from the visual cortex, we should not expect to see clear results
+for an SSVEP experiment from this electrode.
 """
