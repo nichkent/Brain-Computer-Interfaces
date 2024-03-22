@@ -84,15 +84,15 @@ filtered_15hz = filter_data(data, filter_coefficients_b_15hz)
 from filter_ssvep_data import get_envelope
 
 # get 15hz envelope for filtered data for electrode Oz
-envelope_15hz = get_envelope(data, filtered_15hz, "Fz", ssvep_frequency="15 Hz")
+envelope_15hz = get_envelope(data, filtered_15hz, "Oz", ssvep_frequency="15 Hz")
 
 # get 12hz envelope for filtered data for electrode Oz
-envelope_12hz = get_envelope(data, filtered_12hz, "Fz", ssvep_frequency="12 Hz")
+envelope_12hz = get_envelope(data, filtered_12hz, "Oz", ssvep_frequency="12 Hz")
 
 #%% Part 5: Plot the Amplitudes
 from filter_ssvep_data import plot_ssvep_amplitudes
 
-avg_dif_12hz, avg_dif_15hz = plot_ssvep_amplitudes(data, envelope_12hz, envelope_15hz, "Fz","12hz", "15hz", 1)
+avg_dif_12hz, avg_dif_15hz = plot_ssvep_amplitudes(data, envelope_12hz, envelope_15hz, "Oz","12hz", "15hz", 1)
 
 # the following print statement was written to aid in answering the questions below
 print(f"Average difference (12hz envelope - 15 hz envelope)for 12 hz trials: {avg_dif_12hz}")
