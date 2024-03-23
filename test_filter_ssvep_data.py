@@ -5,7 +5,10 @@ Created on Thu Mar  7 11:28:34 2024
 File: test_filter_ssvep_data.py
 Authors: Nicholas Kent, Alaina Birney
 Date: 3/7/2024
-Description: This script, test_filter_ssvep_data.py,
+Description: This script, test_filter_ssvep_data.py, using the functions in import_ssvep_data.py to perform operations on
+data from an SSVEP experiment. This script is split into blocks each relating with one of the functions in filter_ssvep_data.py
+that will allow the user to process and visualize the EEG data from an SSVEP experiment after a bandpass filter has been applied
+as well as the data's envelope for any channel it the file is provided.
 """
 
 #%%
@@ -158,4 +161,41 @@ responses during both events and relatively similar values for 12 Hz and 15 Hz
 events align well with our understanding of SSVEPs; as electrode Fz does not
 measure activity from the visual cortex, we should not expect to see clear results
 for an SSVEP experiment from this electrode.
+"""
+
+#%%
+# Part 6
+from filter_ssvep_data import plot_filtered_spectra
+
+# Call plot_filtered_spectra on the 12hz data
+plot_filtered_spectra(data, filtered_12hz, envelope_12hz)
+
+# Call plot_filtered_spectra on the 15hz data
+plot_filtered_spectra(data, filtered_15hz, envelope_15hz)
+
+"""
+1. The overall shape of the spectrum changes after filtering because the filter 
+is designed to allow certain frequency components of the signal to pass through 
+while reducing others. Specifically, a bandpass filter, which we applied here, 
+allowed a band of 12Hz and 15Hz to pass while reducing the other signals. 
+This is why you see a prominent peak at the target frequency and a reduction in power 
+at other frequencies.
+
+2. The bandpass filter applied to the data has a sharper roll-off, thus 
+reducing the 15Hz component more than the 12Hz component. Additionally, the initial power at the 
+15Hz frequency could be lower in the raw signal, which would result in less power 
+after filtering even if the filter is equally effective at both frequencies.
+
+3. In the envelope representation, we expect to see a smooth curve that traces 
+the upper outline of the signal's amplitude. If peaks are present in
+the envelope at specific frequencies in the raw or filtered data, they would 
+indicate rhythmic activity that would be reflected in the envelope. The absence 
+of a peak at 15Hz in the envelope plot means that the changes in amplitude at 15Hz are not as 
+pronounced as at 12Hz, which would be consistent with the earlier observation 
+of less power at 15Hz in the filtered data. Additionally, the process of 
+calculating the envelope, which involved a Hilbert transform followed 
+by taking the absolute value, can smooth out the frequency-specific peaks, 
+especially if the peaks were not strong enough or if too much noise was present in
+other frequency bands.
+
 """

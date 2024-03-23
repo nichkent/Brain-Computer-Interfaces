@@ -5,7 +5,14 @@ Created on Thu Mar  7 11:28:07 2024
 File: filter_ssvep_data.py
 Authors: Nicholas Kent, Alaina Birney
 Date: 3/7/2024
-Description: This script, filter_ssvep_data.py,
+Description: This script, filter_ssvep_data.py, focuses primarily on isolating and analyzing
+Stead-State Visually Evoked Potentials (SSVEP) within specific frequency bands. Firstly, the
+script begins by creating bandpass filters, to filter the EEG data to include only the frequencies
+of interest (12Hz and 15Hz). This reduces noise and irrelevent frequency components that would otherwise
+change analysis of the data. The script then applies these filters to the EEG data, generating filtered signals
+that are more representative of the underlying neural response to SSVEP stimulus from the particpant. Then, the script
+calculates the envelopes of these signals, highlighting amplitude modulation within each band, and provides
+a clear indication of the temporal spectra at different stages (i.e. raw, filtered, and envelope) for each channel.
 """
 
 #%%
@@ -380,5 +387,94 @@ def plot_ssvep_amplitudes(data, envelope_a, envelope_b, channel_to_plot,
     avg_dif_b = np.mean(dif[change_sample+1:])  
     
     return avg_dif_a, avg_dif_b
+
+#%%
+# Part 6
+
+# Import
+from import_ssvep_data import epoch_ssvep_data, get_frequency_spectrum
+
+def plot_filtered_spectra(data, filtered_data, envelope):
+    """
+    Plots the power spectra of raw, filtered, and envelope EEG data for specified channels.
     
+    This function takes raw EEG data, filtered EEG data, and the envelope of the filtered EEG data, 
+    then computes and plots their power spectra for selected channels. The power spectra are plotted 
+    for each stage of data processing (raw, filtered, envelope) to facilitate the comparison of 
+    signal processing effects on the EEG data.
     
+    Parameters
+    ----------
+    data : dict
+        A dictionary containing raw EEG data, channel information, and sing frequency. 
+        The relevent keys are 'eeg', 'channels', and 'fs'.
+    filtered_data : numpy array
+        A 2D numpy array of the filtered EEG data with the same dimensions and channel order as `data['eeg']`.
+    envelope : numpy array
+        A 2D numpy array of the envelope of the filtered EEG data, obtained through signal processing 
+        techniques such as Hilbert transform.
+    
+    Returns
+    -------
+    None
+    
+    Notes
+    -----
+    The function specifically targets the 'Fz' and 'Oz' channels for analysis but can be easily 
+    modified to include additional or different channels. It uses subplots to create a 3-column 
+    layout for each channel, where each column corresponds to one of the data stages (raw, filtered, envelope).
+    Epoching is performed on the data before computing the power spectrum, which is then converted 
+    to decibels for plotting. The function relies on external functions `epoch_ssvep_data` and 
+    `get_frequency_spectrum` for epoching and spectrum analysis, respectively.
+    
+    """
+
+    # label the channels to plot
+    channels_to_plot = ['Fz', 'Oz']
+    
+    # Generate the subplots based on the number of channels
+    fig, axs = plt.subplots(len(channels_to_plot), 3, figsize=(15, 10))
+    
+    # Define epoch parameters 
+    epoch_start_time = 0  # in seconds
+    epoch_end_time = 2    # in seconds
+
+    # Iterates through the channel's data and sets up the subplot for Raw, Filtered, and Envelope.
+    for i, channel in enumerate(channels_to_plot):
+        channel_idx = np.where(data['channels'] == channel)[0][0]
+        
+        # Stage the data for epoching
+        for j, stage_data in enumerate([data['eeg'], filtered_data, envelope]):
+            # Prepare the data dictionary for epoching
+            data_for_epoching = {
+                'eeg': stage_data[channel_idx][np.newaxis, :],  # Add an axis to make it 2D array
+                'channels': np.array([channel]),
+                'fs': data['fs'],
+                'event_samples': np.array([0]),  
+                'event_durations': np.array([len(stage_data[channel_idx])]),
+                'event_types': np.array([1])  # Dummy event type
+            }
+            
+            # Epoch the data with the function epoch_ssvep_data from import_ssvep_data.py
+            eeg_epochs, epoch_times, _ = epoch_ssvep_data(data_for_epoching, epoch_start_time, epoch_end_time)
+            
+            # Obtain the frequency spectrum with the function get_frequency_spectrum from import_ssvep_data.py
+            eeg_epochs_fft, fft_frequencies = get_frequency_spectrum(eeg_epochs, data['fs'])
+            
+            # Calculate the power spectrum in dB
+            power_spectrum = np.mean(np.abs(eeg_epochs_fft) ** 2, axis=0)  # Average over epochs
+            power_spectrum_db = 10 * np.log10(power_spectrum) # Conversion to decibels (dB)
+            
+            # Plot on the graph both the frequency and power spectrum for both channels
+            axs[i, j].plot(fft_frequencies, power_spectrum_db[0], label=channel)
+            axs[i, j].set_title(f'{channel} - {"Raw" if j == 0 else "Filtered" if j == 1 else "Envelope"}')
+            axs[i, j].set_xlabel('Frequency (Hz)')
+            axs[i, j].set_ylabel('Power (dB)')
+            axs[i, j].set_xlim(0, 60) 
+            axs[i, j].legend()
+
+    # Display in a tight layout
+    plt.tight_layout()
+
+    # Display the plot
+    plt.show()    
