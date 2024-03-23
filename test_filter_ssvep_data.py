@@ -167,11 +167,17 @@ for an SSVEP experiment from this electrode.
 # Part 6
 from filter_ssvep_data import plot_filtered_spectra
 
+# Define a label for the current graph
+frequency_band = "12hz"
+
 # Call plot_filtered_spectra on the 12hz data
-plot_filtered_spectra(data, filtered_12hz, envelope_12hz)
+plot_filtered_spectra(data, filtered_12hz, envelope_12hz, frequency_band)
+
+# Define a label for the current graph
+frequency_band = "15hz"
 
 # Call plot_filtered_spectra on the 15hz data
-plot_filtered_spectra(data, filtered_15hz, envelope_15hz)
+plot_filtered_spectra(data, filtered_15hz, envelope_15hz, frequency_band)
 
 """
 1. The overall shape of the spectrum changes after filtering because the filter 

@@ -394,7 +394,7 @@ def plot_ssvep_amplitudes(data, envelope_a, envelope_b, channel_to_plot,
 # Import
 from import_ssvep_data import epoch_ssvep_data, get_frequency_spectrum
 
-def plot_filtered_spectra(data, filtered_data, envelope):
+def plot_filtered_spectra(data, filtered_data, envelope, frequency_band):
     """
     Plots the power spectra of raw, filtered, and envelope EEG data for specified channels.
     
@@ -475,6 +475,15 @@ def plot_filtered_spectra(data, filtered_data, envelope):
 
     # Display in a tight layout
     plt.tight_layout()
+    
+    # Make room at the top for the title
+    plt.subplots_adjust(top=0.9)
+    
+    # Set fig title
+    fig.suptitle(f'{frequency_band} Filtered Spectra')
+    
+    # Save figure with name of frequency
+    plt.savefig(f'{frequency_band}_filtered_spectra.png')
 
     # Display the plot
     plt.show()    
