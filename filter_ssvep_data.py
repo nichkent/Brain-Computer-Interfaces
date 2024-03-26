@@ -164,7 +164,7 @@ def filter_data(data, b):
 
 #%% Part 4: Calculate the Envelope
 
-def get_envelope(data, filtered_data, channel_to_plot, ssvep_frequency="None"):
+def get_envelope(data, filtered_data, channel_to_plot="None", ssvep_frequency="None"):
     """
     Extract the envelope surrounding a wave of EEG data for every channel 
     at every time point. The envelope connects the peaks in the wave, thus 
@@ -213,46 +213,48 @@ def get_envelope(data, filtered_data, channel_to_plot, ssvep_frequency="None"):
     
     # initialize variable to hold envelope data
     envelope = np.zeros(filtered_data.shape)
-    
-    # loop through channels to calculate envelope for each channel at each time point
-    for channel in range(num_channels):
-        envelope[channel] = np.abs(hilbert(filtered_data[channel,:]))
-        
-    # plot band-pass filtered data on given channel with its envelope on top
-    # for channel_to_plot
-    # get channel as number from string
-    # loop through channels key in data dict, grab index of matching string
-    # initialize channel_idx_to_plot in case no match is found
-    channel_idx_to_plot = None
-    for channel_index, channel_value in enumerate(data["channels"]):
-        if channel_value == channel_to_plot:
-            channel_idx_to_plot = channel_index
+    if channel_to_plot is not None:
+        # loop through channels to calculate envelope for each channel at each time point
+        for channel in range(num_channels):
+            envelope[channel] = np.abs(hilbert(filtered_data[channel,:]))
             
-    if channel_idx_to_plot is not None:
-        plt.figure()
-        # plot data from channel of interest
-        data_to_plot = filtered_data[channel_idx_to_plot,:]
-        # time should be length of total recording duration, spaced by sampling interval
-        num_samples = data_to_plot.shape[0]
-        fs = data["fs"]
-        time = np.arange(0,num_samples)/fs
-        plt.plot(time, data_to_plot, label="Band-pass Filtered EEG Data")
-        plt.plot(time, envelope[channel_idx_to_plot,:], label="Envelope", color="orange")
-        
-        # if statement to have title state unknown when ssvep_frequency is None
-        if ssvep_frequency == None:
-            ssvep_frequency = "Unknown"
+        # plot band-pass filtered data on given channel with its envelope on top
+        # for channel_to_plot
+        # get channel as number from string
+        # loop through channels key in data dict, grab index of matching string
+        # initialize channel_idx_to_plot in case no match is found
+        channel_idx_to_plot = None
+        for channel_index, channel_value in enumerate(data["channels"]):
+            if channel_value == channel_to_plot:
+                channel_idx_to_plot = channel_index
+                
+        if channel_idx_to_plot is not None:
+            plt.figure()
+            # plot data from channel of interest
+            data_to_plot = filtered_data[channel_idx_to_plot,:]
+            # time should be length of total recording duration, spaced by sampling interval
+            num_samples = data_to_plot.shape[0]
+            fs = data["fs"]
+            time = np.arange(0,num_samples)/fs
+            plt.plot(time, data_to_plot, label="Band-pass Filtered EEG Data")
+            plt.plot(time, envelope[channel_idx_to_plot,:], label="Envelope", color="orange")
             
-        plt.title(f"Band-pass Filtered EEG Data for Channel {channel_to_plot}. Isolating {ssvep_frequency} Frequency.")
-        plt.xlabel("Time (s)")
-        plt.ylabel("Voltage (uV)")
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
-        # save plot
-        # Save the plot
-        filename = f"BPF_Data_Channel_{channel_to_plot}_Isolating_{ssvep_frequency}.png"
-        plt.savefig(filename)
+            # if statement to have title state unknown when ssvep_frequency is None
+            if ssvep_frequency == None:
+                ssvep_frequency = "Unknown"
+                
+            plt.title(f"Band-pass Filtered EEG Data for Channel {channel_to_plot}. Isolating {ssvep_frequency} Frequency.")
+            plt.xlabel("Time (s)")
+            plt.ylabel("Voltage (uV)")
+            plt.legend()
+            plt.tight_layout()
+            plt.show()
+            # save plot
+            # Save the plot
+            filename = f"BPF_Data_Channel_{channel_to_plot}_Isolating_{ssvep_frequency}.png"
+            plt.savefig(filename)
+        else:
+            print("If you would like to create a plot, specify channel_to_plot")
     return envelope
 
 #%% Part 5: Plot the Amplitudes
@@ -394,7 +396,7 @@ def plot_ssvep_amplitudes(data, envelope_a, envelope_b, channel_to_plot,
 # Import
 from import_ssvep_data import epoch_ssvep_data, get_frequency_spectrum
 
-def plot_filtered_spectra(data, filtered_data, envelope, channels, frequency_band="12hz"):
+def plot_filtered_spectra(data, filtered_data, envelope, frequency_band):
     """
     Plots the power spectra of raw, filtered, and envelope EEG data for specified channels.
     
@@ -428,16 +430,19 @@ def plot_filtered_spectra(data, filtered_data, envelope, channels, frequency_ban
     `get_frequency_spectrum` for epoching and spectrum analysis, respectively.
     
     """
+
+    # label the channels to plot
+    channels_to_plot = ['Fz', 'Oz']
     
     # Generate the subplots based on the number of channels
-    fig, axs = plt.subplots(len(channels), 3, figsize=(15, 10))
+    fig, axs = plt.subplots(len(channels_to_plot), 3, figsize=(15, 10))
     
     # Define epoch parameters 
     epoch_start_time = 0  # in seconds
     epoch_end_time = 2    # in seconds
 
     # Iterates through the channel's data and sets up the subplot for Raw, Filtered, and Envelope.
-    for i, channel in enumerate(channels):
+    for i, channel in enumerate(channels_to_plot):
         channel_idx = np.where(data['channels'] == channel)[0][0]
         
         # Stage the data for epoching
