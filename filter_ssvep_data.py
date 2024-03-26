@@ -394,7 +394,7 @@ def plot_ssvep_amplitudes(data, envelope_a, envelope_b, channel_to_plot,
 # Import
 from import_ssvep_data import epoch_ssvep_data, get_frequency_spectrum
 
-def plot_filtered_spectra(data, filtered_data, envelope, frequency_band):
+def plot_filtered_spectra(data, filtered_data, envelope, channels, frequency_band="12hz"):
     """
     Plots the power spectra of raw, filtered, and envelope EEG data for specified channels.
     
@@ -428,19 +428,16 @@ def plot_filtered_spectra(data, filtered_data, envelope, frequency_band):
     `get_frequency_spectrum` for epoching and spectrum analysis, respectively.
     
     """
-
-    # label the channels to plot
-    channels_to_plot = ['Fz', 'Oz']
     
     # Generate the subplots based on the number of channels
-    fig, axs = plt.subplots(len(channels_to_plot), 3, figsize=(15, 10))
+    fig, axs = plt.subplots(len(channels), 3, figsize=(15, 10))
     
     # Define epoch parameters 
     epoch_start_time = 0  # in seconds
     epoch_end_time = 2    # in seconds
 
     # Iterates through the channel's data and sets up the subplot for Raw, Filtered, and Envelope.
-    for i, channel in enumerate(channels_to_plot):
+    for i, channel in enumerate(channels):
         channel_idx = np.where(data['channels'] == channel)[0][0]
         
         # Stage the data for epoching
