@@ -396,7 +396,7 @@ def plot_ssvep_amplitudes(data, envelope_a, envelope_b, channel_to_plot,
 # Import
 from import_ssvep_data import epoch_ssvep_data, get_frequency_spectrum
 
-def plot_filtered_spectra(data, filtered_data, envelope, channels, frequency_band="12hz"):
+def plot_filtered_spectra(data, filtered_data, envelope, channels=['Fz', 'Oz'], frequency_band="12hz"):
     """
     Plots the power spectra of raw, filtered, and envelope EEG data for specified channels.
     
